@@ -1,35 +1,70 @@
 import React, { Component } from 'react';
-import Character from './components/Character';
+import ReactDOM from 'react-dom';
+import Header from './Header.js';
+import Nav from './Nav.js';
+import PreviousButton from './PreviousButton.js';
+import NextButton from './NextButton.js';
+import CardComponent from './CardComponent.js';
+import InBetween from './InBetween.js';
+// import Character from './components/Character';
+
+// Style Files
+
 import './App.css';
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      starwarsChars: []
+      starwarsChars: [],
+      info: {}
     };
   }
   componentDidMount() {
-    // feel free to research what this code is doing.
-    // At a high level we are calling an API to fetch some starwars data from the open web.
-    // We then take that data and resolve it our state.
-    fetch('https://swapi.co/api/people')
-      .then(res => {
-        return res.json();
-      })
-      .then(data => {
-        this.setState({ starwarsChars: data.results });
-      })
-      .catch(err => {
-        throw new Error(err);
-      });
+    this.getCharacters('https://swapi.co/api/people');
   }
+
+  componentDidUpdate() {
+    ReactDOM.findDOMNode(this).scrollIntoView();
+  }
+
+    getCharacters = URL => {
+      fetch(URL)
+        .then(res => {
+          return res.json();
+        })
+        .then(data => {
+          this.setState({ starwarsChars: data.results });
+        })
+        .catch(err => {
+          throw new Error(err);
+        });
+    };
+
+    goNext = () => {
+      if (this.state.info.goPrevious !== null) {
+        return this.getCharacters(this.state.info.goNext)
+      }
+    }
+
+    goPrevious = () => {
+      if (this.state.info.goPrevious !== null) {
+        return this.getCharacters(this.state.info.next)
+      }
+    }
+
   render() {
     return (
       <div className="App">
-        <h1 className="Header">React Wars</h1>
-        <div>
-          {this.state.starwarsChars.map((character, index) => <Character index={index} key={index} {...character} />)}
+        <Nav />
+        <Header />
+        <InBetween />
+        <div className="allcards">
+          <CardComponent starwarsChars={this.state.starwarsChars}/>
+          <div className="buttons">
+            <PreviousButton onClick={this.goPrevious} />
+            <NextButton onClick={this.goNext} />
+          </div>
         </div>
       </div>
     );
